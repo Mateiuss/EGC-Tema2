@@ -248,8 +248,6 @@ void Tema2::Update(float deltaTimeSeconds)
 	}
 
     for (int i = 0; i < enemyTanks.size(); i++) {
-		enemyTanks[i].timeFromLastShot += deltaTimeSeconds;
-
         bool erase = false;
 
         for (int j = 0; j < projectiles.size(); j++) {
@@ -289,6 +287,8 @@ void Tema2::Update(float deltaTimeSeconds)
         }
 
         enemyTanks[i].move(deltaTimeSeconds);
+
+        enemyTanks[i].attack(deltaTimeSeconds, myTank.position, projectiles);
 	}
 }
 

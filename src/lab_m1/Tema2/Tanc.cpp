@@ -1,4 +1,5 @@
 #include "Tanc.h"
+#include <iostream>
 
 Tanc::Tanc()
 {
@@ -20,6 +21,7 @@ Tanc::Tanc(glm::vec3 position, glm::vec3 forward, float angle)
 	this->hp = 100;
 	this->timeFromLastMove = 0;
 	this->get_random_moving_state();
+	this->range = 7.5f;
 }
 
 Tanc::~Tanc()
@@ -138,3 +140,33 @@ void Tanc::move(float delta)
 		break;
 	}
 }
+
+void Tanc::attack(float delta, glm::vec3 pos, std::vector<Projectile>& projectiles)
+{
+	// Check if the player is in range
+	if (glm::distance(this->position, pos) > this->range) return;
+
+	if (glm::distance(this->position, pos) < 4.f) this->movingState = STOP;
+
+	// Move the turret towards the player
+	glm::vec3 direction = glm::normalize(pos - this->position);
+	float angle = glm::degrees(acos(glm::dot(direction, this->forward_turret)));
+
+	if (angle > 2.f)
+	{
+		glm::vec3 cross = glm::cross(this->forward_turret, direction);
+		float rotationDirection = glm::sign(cross.y);
+
+		this->rotate_turret(rotationDirection * delta * 30);
+	}
+	else if (this->timeFromLastShot > 2)
+	{
+		projectiles.push_back(this->shoot());
+		this->timeFromLastShot = 0;
+	}
+	else
+	{
+		this->timeFromLastShot += delta;
+	}
+}
+

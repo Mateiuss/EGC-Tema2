@@ -33,6 +33,7 @@ public:
 	void move(float delta);
 
 	Projectile shoot();
+	void attack(float delta, glm::vec3 pos, std::vector<Projectile> &projectiles);
 
 	glm::vec3 position;
 	glm::vec3 forward_body;
@@ -52,5 +53,6 @@ public:
 	float radius;
 	int hp;
 	MovingState movingState;
+	float range;
 };
 
