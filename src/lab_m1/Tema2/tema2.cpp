@@ -26,6 +26,8 @@ Tema2::~Tema2()
 
 void Tema2::Init()
 {
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     camera = new implemented::Camera();
     camera->Set(glm::vec3(0, 1.f, 3.5f), glm::vec3(0, -1, 0), glm::vec3(0, 1, 0));
 
@@ -281,6 +283,12 @@ void Tema2::Update(float deltaTimeSeconds)
                 decollision_tanks(&enemyTanks[i], &enemyTanks[j]);
             }
         }
+
+        if (enemyTanks[i].timeFromLastMove > 5) {
+            enemyTanks[i].get_random_moving_state();
+        }
+
+        enemyTanks[i].move(deltaTimeSeconds);
 	}
 }
 
@@ -338,7 +346,7 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         camera->position = myTank.position - camera->distanceToTarget * camera->forward;
     }
     else {
-        float sensivity = 0.4f;
+        float sensivity = 0.35f;
 
 		myTank.rotate_turret(-sensivity * deltaX);
     }

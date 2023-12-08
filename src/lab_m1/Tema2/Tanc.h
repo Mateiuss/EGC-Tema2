@@ -6,6 +6,18 @@
 class Tanc
 {
 public:
+	enum MovingState {
+		FORWARD,
+		BACKWARD,
+		ROTATE_LEFT,
+		ROTATE_RIGHT,
+		STOP,
+		ROTATE_RIGHT_WHILE_FORWARD,
+		ROTATE_LEFT_WHILE_FORWARD,
+		ROTATE_RIGHT_WHILE_BACKWARD,
+		ROTATE_LEFT_WHILE_BACKWARD
+	};
+
 	Tanc();
 	Tanc(glm::vec3 position, glm::vec3 forward, float angle);
 	~Tanc();
@@ -16,6 +28,9 @@ public:
 	void rotate_turret(float angle);
 
 	void set_colors(glm::vec3 senile_color, glm::vec3 corp_color, glm::vec3 turela_color, glm::vec3 tun_color);
+
+	void get_random_moving_state();
+	void move(float delta);
 
 	Projectile shoot();
 
@@ -29,11 +44,13 @@ public:
 	std::string turela;
 	std::string tun;
 	float timeFromLastShot;
+	float timeFromLastMove;
 	glm::vec3 senile_color;
 	glm::vec3 corp_color;
 	glm::vec3 turela_color;
 	glm::vec3 tun_color;
 	float radius;
 	int hp;
+	MovingState movingState;
 };
 
