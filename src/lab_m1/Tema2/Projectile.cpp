@@ -6,6 +6,7 @@ Projectile::Projectile()
 	lifeTime = 0;
 	scale = 0.05f;
 	meshName = "sphere";
+	damage = 40;
 }
 
 Projectile::~Projectile()

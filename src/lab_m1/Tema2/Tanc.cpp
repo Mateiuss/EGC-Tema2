@@ -17,6 +17,7 @@ Tanc::Tanc(glm::vec3 position, glm::vec3 forward, float angle)
 	this->tun = "tun";
 	this->timeFromLastShot = 2;
 	this->radius = 0.45f;
+	this->hp = 100;
 }
 
 Tanc::~Tanc()

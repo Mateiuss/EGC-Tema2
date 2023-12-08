@@ -40,6 +40,10 @@ namespace m1
         bool tank_building_intersect(Tanc *tank, Building *building);
         void decollision_tank_building(Tanc *tank, Building *building);
 
+        bool tank_projectile_intersect(Tanc *tank, Projectile *projectile);
+
+        bool projectile_building_intersect(Projectile *projectile, Building *building);
+
      protected:
         implemented::Camera *camera;
         glm::mat4 projectionMatrix;
@@ -48,6 +52,8 @@ namespace m1
 
         std::vector<Building> buildingModels;
         std::vector<Building> buildings;
+
+        std::vector<Tanc> enemyTanks;
 
         glm::vec3 lightPosition;
         unsigned int materialShininess;

@@ -17,5 +17,6 @@ public:
 	float lifeTime;
 	float scale;
 	std::string meshName;
+	int damage;
 };
 

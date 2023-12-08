@@ -34,5 +34,6 @@ public:
 	glm::vec3 turela_color;
 	glm::vec3 tun_color;
 	float radius;
+	int hp;
 };
 
