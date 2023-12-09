@@ -23,7 +23,6 @@ Tema2::~Tema2()
 {
 }
 
-
 void Tema2::Init()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
@@ -43,7 +42,7 @@ void Tema2::Init()
     }
 
     {
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 15; i++) {
             glm::vec3 position = glm::vec3(rand() % 50 - rand() % 50, 0, rand() % 50 - rand() % 50);
 			Tanc enemyTank = enemyTankModel;
 			enemyTank.position = position;
@@ -57,14 +56,14 @@ void Tema2::Init()
         buildingModels.push_back(Building(glm::vec3(0, 0, 0), 3, 6, 9));
         buildingModels.push_back(Building(glm::vec3(0, 0, 0), 12, 3, 3));
 
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 30; i++) {
             // get random building model
             int model_index = rand() % buildingModels.size();
             Building building = buildingModels[model_index];
 
             // get random position for building
-            float x = rand() % 50 - rand() % 50;
-            float z = rand() % 50 - rand() % 50;
+            float x = rand() % 75 - rand() % 75;
+            float z = rand() % 75 - rand() % 75;
             glm::vec3 center = glm::vec3(x, building.height / 2, z);
 
             building.center = center;
@@ -469,6 +468,12 @@ void Tema2::decollision_tank_building(Tanc* tank, Building* building) {
 
     // Calculate the displacement vector from the sphere center to the closest point
     glm::vec3 displacement = tank->position - closestPoint;
+
+    if (glm::length(displacement) < 0.0001f) {
+		// Sphere center and closest point coincide
+		// Choose random (but consistent) values
+		displacement = glm::vec3(1, 0, 0);
+	}
 
     // Normalize the displacement vector
     glm::vec3 collisionNormal = glm::normalize(displacement);

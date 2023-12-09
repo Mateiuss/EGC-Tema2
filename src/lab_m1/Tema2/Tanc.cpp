@@ -143,6 +143,8 @@ void Tanc::move(float delta)
 
 void Tanc::attack(float delta, glm::vec3 pos, std::vector<Projectile>& projectiles)
 {
+	this->timeFromLastShot += delta;
+
 	// Check if the player is in range
 	if (glm::distance(this->position, pos) > this->range) return;
 
@@ -163,10 +165,6 @@ void Tanc::attack(float delta, glm::vec3 pos, std::vector<Projectile>& projectil
 	{
 		projectiles.push_back(this->shoot());
 		this->timeFromLastShot = 0;
-	}
-	else
-	{
-		this->timeFromLastShot += delta;
 	}
 }
 
