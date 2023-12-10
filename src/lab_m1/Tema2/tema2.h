@@ -13,6 +13,17 @@ namespace m1
     class Tema2 : public gfxc::SimpleScene
     {
      public:
+         struct ViewportArea
+         {
+             ViewportArea() : x(0), y(0), width(1), height(1) {}
+             ViewportArea(int x, int y, int width, int height)
+                 : x(x), y(y), width(width), height(height) {}
+             int x;
+             int y;
+             int width;
+             int height;
+         };
+
         Tema2();
         ~Tema2();
 
@@ -36,17 +47,18 @@ namespace m1
 
         bool tanks_intersect(Tanc *tank1, Tanc *tank2);
         void decollision_tanks(Tanc *tank1, Tanc *tank2);
-
         bool tank_building_intersect(Tanc *tank, Building *building);
         void decollision_tank_building(Tanc *tank, Building *building);
-
         bool tank_projectile_intersect(Tanc *tank, Projectile *projectile);
-
         bool projectile_building_intersect(Projectile *projectile, Building *building);
+        void render_scene();
+
+        void finish_game();
 
      protected:
-        implemented::Camera *camera;
+        implemented::Camera *camera, copyCamera;
         glm::mat4 projectionMatrix;
+        glm::mat4 miniMapProjectionMatrix;
         Tanc myTank;
         Tanc enemyTankModel;
 
@@ -54,6 +66,7 @@ namespace m1
         std::vector<Building> buildings;
 
         std::vector<Tanc> enemyTanks;
+        std::vector<Tanc> destroyedEnemyTanks;
 
         glm::vec3 lightPosition;
         unsigned int materialShininess;
@@ -61,5 +74,13 @@ namespace m1
         float materialKs;
 
         std::vector<Projectile> projectiles;
+
+        float playTime;
+        float maxPlayTime;
+        float points;
+
+        bool gameOver;
+
+        ViewportArea miniViewportArea;
     };
 }   // namespace m1

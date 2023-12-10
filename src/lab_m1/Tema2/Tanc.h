@@ -54,5 +54,7 @@ public:
 	int hp;
 	MovingState movingState;
 	float range;
+	float forward_speed;
+	float rotation_speed;
 };
 

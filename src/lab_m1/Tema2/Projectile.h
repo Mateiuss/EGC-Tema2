@@ -18,5 +18,7 @@ public:
 	float scale;
 	std::string meshName;
 	int damage;
+
+	static float maxLifeTime;
 };
 

@@ -1,8 +1,10 @@
 #include "Projectile.h"
 
+float Projectile::maxLifeTime = 20.f;
+
 Projectile::Projectile()
 {
-	speed = 2.5f;
+	speed = 4.f;
 	lifeTime = 0;
 	scale = 0.05f;
 	meshName = "sphere";

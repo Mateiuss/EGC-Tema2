@@ -27,6 +27,12 @@ void Tema2::Init()
 {
     std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
+    playTime = 0;
+    maxPlayTime = 120;
+    points = 0;
+
+    gameOver = false;
+
     camera = new implemented::Camera();
     camera->Set(glm::vec3(0, 1.f, 3.5f), glm::vec3(0, -1, 0), glm::vec3(0, 1, 0));
 
@@ -42,8 +48,8 @@ void Tema2::Init()
     }
 
     {
-        for (int i = 0; i < 15; i++) {
-            glm::vec3 position = glm::vec3(rand() % 50 - rand() % 50, 0, rand() % 50 - rand() % 50);
+        for (int i = 0; i < 20; i++) {
+            glm::vec3 position = glm::vec3(rand() % 75 - rand() % 75, 0, rand() % 75 - rand() % 75);
 			Tanc enemyTank = enemyTankModel;
 			enemyTank.position = position;
 			enemyTanks.push_back(enemyTank);
@@ -128,20 +134,13 @@ void Tema2::Init()
         materialKs = 0.5;
     }
 
+    miniViewportArea = ViewportArea(10, 470, window->props.resolution.y / 3, window->props.resolution.y / 3);
+
     projectionMatrix = glm::perspective(RADIANS(60), window->props.aspectRatio, 0.01f, 200.0f);
+    miniMapProjectionMatrix = glm::ortho(-15.f, 15.f, -15.f, 15.f, 0.01f, 200.0f);
 }
 
-
-void Tema2::FrameStart()
-{
-    // Clears the color buffer (using the previously set color) and depth buffer
-    glClearColor(0.67f, 0.53f, 0.17f, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glm::ivec2 resolution = window->GetResolution();
-    // Sets the screen area where to draw
-    glViewport(0, 0, resolution.x, resolution.y);
-
+void Tema2::render_scene() {
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::scale(modelMatrix, glm::vec3(3));
@@ -169,18 +168,37 @@ void Tema2::FrameStart()
     {
         for (int i = 0; i < enemyTanks.size(); i++) {
             glm::mat4 modelMatrix = glm::mat4(1);
-			modelMatrix = glm::translate(modelMatrix, enemyTanks[i].position);
-			modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
-			modelMatrix = glm::rotate(modelMatrix, RADIANS(enemyTanks[i].body_angle), glm::vec3(0, 1, 0));
-			RenderMesh(meshes["senile"], shaders["TemaShader"], modelMatrix, enemyTanks[i].senile_color, enemyTanks[i].hp, 1);
-			RenderMesh(meshes["corp"], shaders["TemaShader"], modelMatrix, enemyTanks[i].corp_color, enemyTanks[i].hp, 2);
+            modelMatrix = glm::translate(modelMatrix, enemyTanks[i].position);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+            modelMatrix = glm::rotate(modelMatrix, RADIANS(enemyTanks[i].body_angle), glm::vec3(0, 1, 0));
+            RenderMesh(meshes["senile"], shaders["TemaShader"], modelMatrix, enemyTanks[i].senile_color, enemyTanks[i].hp, 1);
+            RenderMesh(meshes["corp"], shaders["TemaShader"], modelMatrix, enemyTanks[i].corp_color, enemyTanks[i].hp, 2);
 
-			modelMatrix = glm::mat4(1);
-			modelMatrix = glm::translate(modelMatrix, enemyTanks[i].position);
-			modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
-			modelMatrix = glm::rotate(modelMatrix, RADIANS(enemyTanks[i].turret_angle), glm::vec3(0, 1, 0));
-			RenderMesh(meshes["turela"], shaders["TemaShader"], modelMatrix, enemyTanks[i].turela_color, enemyTanks[i].hp, 3);
-			RenderMesh(meshes["tun"], shaders["TemaShader"], modelMatrix, enemyTanks[i].tun_color, enemyTanks[i].hp, 0);
+            modelMatrix = glm::mat4(1);
+            modelMatrix = glm::translate(modelMatrix, enemyTanks[i].position);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+            modelMatrix = glm::rotate(modelMatrix, RADIANS(enemyTanks[i].turret_angle), glm::vec3(0, 1, 0));
+            RenderMesh(meshes["turela"], shaders["TemaShader"], modelMatrix, enemyTanks[i].turela_color, enemyTanks[i].hp, 3);
+            RenderMesh(meshes["tun"], shaders["TemaShader"], modelMatrix, enemyTanks[i].tun_color, enemyTanks[i].hp, 0);
+        }
+    }
+
+    // Render destroyed enemy tanks
+    {
+        for (int i = 0; i < destroyedEnemyTanks.size(); i++) {
+            glm::mat4 modelMatrix = glm::mat4(1);
+            modelMatrix = glm::translate(modelMatrix, destroyedEnemyTanks[i].position);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+            modelMatrix = glm::rotate(modelMatrix, RADIANS(destroyedEnemyTanks[i].body_angle), glm::vec3(0, 1, 0));
+            RenderMesh(meshes["senile"], shaders["TemaShader"], modelMatrix, destroyedEnemyTanks[i].senile_color, destroyedEnemyTanks[i].hp, 1);
+            RenderMesh(meshes["corp"], shaders["TemaShader"], modelMatrix, destroyedEnemyTanks[i].corp_color, destroyedEnemyTanks[i].hp, 2);
+
+            modelMatrix = glm::mat4(1);
+            modelMatrix = glm::translate(modelMatrix, destroyedEnemyTanks[i].position);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
+            modelMatrix = glm::rotate(modelMatrix, RADIANS(destroyedEnemyTanks[i].turret_angle), glm::vec3(0, 1, 0));
+            RenderMesh(meshes["turela"], shaders["TemaShader"], modelMatrix, destroyedEnemyTanks[i].turela_color, destroyedEnemyTanks[i].hp, 3);
+            RenderMesh(meshes["tun"], shaders["TemaShader"], modelMatrix, destroyedEnemyTanks[i].tun_color, destroyedEnemyTanks[i].hp, 0);
         }
     }
 
@@ -190,23 +208,58 @@ void Tema2::FrameStart()
             glm::mat4 modelMatrix = glm::mat4(1);
             modelMatrix = glm::translate(modelMatrix, projectiles[i].position);
             modelMatrix = glm::scale(modelMatrix, glm::vec3(projectiles[i].scale));
-            RenderMesh(meshes["sphere"], shaders["TemaShader"], modelMatrix, glm::vec3(0.88f, 0.88f, 0.88f), 100, 0);
+            RenderMesh(meshes["sphere"], shaders["TemaShader"], modelMatrix, glm::vec3(0.f, 0.f, 0.f), 100, 0);
         }
     }
 
+    // Render the buildings
     {
         for (int i = 0; i < buildings.size(); i++) {
-			glm::mat4 modelMatrix = glm::mat4(1);
-			modelMatrix = glm::translate(modelMatrix, buildings[i].center);
-			modelMatrix = glm::scale(modelMatrix, glm::vec3(buildings[i].width, buildings[i].height, buildings[i].depth));
-			RenderMesh(meshes["box"], shaders["TemaShader"], modelMatrix, glm::vec3(0.88f, 0.88f, 0.88f), 100, 0);
-		}
+            glm::mat4 modelMatrix = glm::mat4(1);
+            modelMatrix = glm::translate(modelMatrix, buildings[i].center);
+            modelMatrix = glm::scale(modelMatrix, glm::vec3(buildings[i].width, buildings[i].height, buildings[i].depth));
+            RenderMesh(meshes["box"], shaders["TemaShader"], modelMatrix, glm::vec3(0.88f, 0.88f, 0.88f), 100, 0);
+        }
     }
+}
+
+
+void Tema2::FrameStart()
+{
+    // Clears the color buffer (using the previously set color) and depth buffer
+    glClearColor(0.67f, 0.53f, 0.17f, 1);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glm::ivec2 resolution = window->GetResolution();
+    // Sets the screen area where to draw
+    glViewport(0, 0, resolution.x, resolution.y);
+
+    render_scene();
+
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glViewport(miniViewportArea.x, miniViewportArea.y, miniViewportArea.width, miniViewportArea.height);
+
+    glm::mat4 old_projection_matrix = projectionMatrix;
+    copyCamera = *camera;
+    camera->Set(glm::vec3(0, 100.0f, 0), myTank.position, myTank.forward_body);
+    projectionMatrix = miniMapProjectionMatrix;
+    render_scene();
+    projectionMatrix = old_projection_matrix;
+    *camera = copyCamera;
 }
 
 
 void Tema2::Update(float deltaTimeSeconds)
 {
+    if (gameOver) {
+        return;
+    }
+
+    playTime += deltaTimeSeconds;
+    if (playTime > maxPlayTime || myTank.hp <= 0) {
+		finish_game();
+        return;
+	}
     myTank.timeFromLastShot += deltaTimeSeconds;
 
     for (int i = 0; i < buildings.size(); i++) {
@@ -217,10 +270,7 @@ void Tema2::Update(float deltaTimeSeconds)
 
     for (int i = 0; i < projectiles.size(); i++) {
         if (tank_projectile_intersect(&myTank, &projectiles[i])) {
-            if (myTank.hp <= 0) {
-                cout << "GAME OVER" << endl;
-                exit(0);
-            }
+            myTank.hp -= projectiles[i].damage;
         }
 
         bool erase = false;
@@ -240,7 +290,7 @@ void Tema2::Update(float deltaTimeSeconds)
         
 		projectiles[i].position += glm::normalize(projectiles[i].forward) * projectiles[i].speed * deltaTimeSeconds;
 		projectiles[i].lifeTime += deltaTimeSeconds;
-        if (projectiles[i].lifeTime > 10) {
+        if (projectiles[i].lifeTime > Projectile::maxLifeTime) {
 			projectiles.erase(projectiles.begin() + i);
 			i--;
 		}
@@ -251,13 +301,18 @@ void Tema2::Update(float deltaTimeSeconds)
 
         for (int j = 0; j < projectiles.size(); j++) {
             if (tank_projectile_intersect(&enemyTanks[i], &projectiles[j])) {
+                enemyTanks[i].hp -= projectiles[j].damage;
                 if (enemyTanks[i].hp <= 0) {
+                    destroyedEnemyTanks.push_back(enemyTanks[i]);
 					enemyTanks.erase(enemyTanks.begin() + i);
 					i--;
+                    points += 10;
+
+                    cout << "Points: " << points << endl;
 				}
                 erase = true;
 				projectiles.erase(projectiles.begin() + j);
-                break;
+                j--;
             }
         }
 
@@ -289,32 +344,52 @@ void Tema2::Update(float deltaTimeSeconds)
 
         enemyTanks[i].attack(deltaTimeSeconds, myTank.position, projectiles);
 	}
+
+    for (int i = 0; i < destroyedEnemyTanks.size(); i++) {
+        if (tanks_intersect(&myTank, &destroyedEnemyTanks[i])) {
+			decollision_tanks(&myTank, &destroyedEnemyTanks[i]);
+		}
+        
+        for (int j = 0; j < enemyTanks.size(); j++) {
+            if (tanks_intersect(&enemyTanks[j], &destroyedEnemyTanks[i])) {
+                decollision_tanks(&enemyTanks[j], &destroyedEnemyTanks[i]);
+            }
+        }
+
+        for (int j = 0; j < projectiles.size(); j++) {
+            if (tank_projectile_intersect(&destroyedEnemyTanks[i], &projectiles[j])) {
+                projectiles.erase(projectiles.begin() + j);
+            }
+        }
+
+        for (int j = 0; j < buildings.size(); j++) {
+            if (tank_building_intersect(&destroyedEnemyTanks[i], &buildings[j])) {
+                decollision_tank_building(&destroyedEnemyTanks[i], &buildings[j]);
+            }
+        }
+    }
 }
 
 void Tema2::FrameEnd()
 {
-    //DrawCoordinateSystem(camera->GetViewMatrix(), projectionMatrix);
 }
 
 void Tema2::OnInputUpdate(float deltaTime, int mods)
 {
-    float tankForwardSpeed = 1.5f;
-    float tankRotatingSpeed = 30.0f;
-
     if (window->KeyHold(GLFW_KEY_W)) {
-        camera->MoveForward(tankForwardSpeed * deltaTime);
+        camera->MoveForward(myTank.forward_speed * deltaTime);
     }
 
     if (window->KeyHold(GLFW_KEY_A)) {
-        camera->RotateRight(tankRotatingSpeed * deltaTime);
+        camera->RotateRight(myTank.rotation_speed * deltaTime);
     }
 
     if (window->KeyHold(GLFW_KEY_S)) {
-        camera->MoveForward(-tankForwardSpeed * deltaTime);
+        camera->MoveForward(-myTank.forward_speed * deltaTime);
     }
 
     if (window->KeyHold(GLFW_KEY_D)) {
-        camera->RotateRight(-tankRotatingSpeed * deltaTime);
+        camera->RotateRight(-myTank.rotation_speed * deltaTime);
     }
 }
 
@@ -355,7 +430,7 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
 void Tema2::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
     // Add mouse button press event
-    if (button == GLFW_MOUSE_BUTTON_2 && myTank.timeFromLastShot >= 2) {
+    if (button == GLFW_MOUSE_BUTTON_2 && myTank.timeFromLastShot >= 2 && !gameOver) {
 		projectiles.push_back(myTank.shoot());
     }
 }
@@ -495,8 +570,7 @@ bool Tema2::tank_projectile_intersect(Tanc* tank, Projectile* projectile) {
 	float distance = glm::distance(tank->position, projectile->position);
 
     if (distance < tank->radius + projectile->scale) {
-		tank->hp -= projectile->damage;
-		projectile->lifeTime = 10;
+		projectile->lifeTime = Projectile::maxLifeTime;
 
         return true;
 	}
@@ -510,10 +584,23 @@ bool Tema2::projectile_building_intersect(Projectile* projectile, Building* buil
 	// Check if the distance between the closest point and the sphere center is less than the sphere radius
 	float distance = glm::distance(projectile->position, closestPoint);
     if (distance < projectile->scale) {
-		projectile->lifeTime = 10;
+		projectile->lifeTime = Projectile::maxLifeTime;
 
         return true;
 	}
 
     return false;
+}
+
+void Tema2::finish_game() {
+	cout << "GAME OVER" << endl;
+    if (myTank.hp <= 0) {
+        cout << "You lost! No points for you :(" << endl;
+    }
+    else {
+        cout << "You finished with " << points << " points" << endl;
+    }
+    myTank.rotation_speed = 0;
+    myTank.forward_speed = 0;
+    gameOver = true;
 }

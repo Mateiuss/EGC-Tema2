@@ -22,6 +22,8 @@ Tanc::Tanc(glm::vec3 position, glm::vec3 forward, float angle)
 	this->timeFromLastMove = 0;
 	this->get_random_moving_state();
 	this->range = 7.5f;
+	this->forward_speed = 1.5f;
+	this->rotation_speed = 30;
 }
 
 Tanc::~Tanc()
@@ -109,32 +111,32 @@ void Tanc::move(float delta)
 	switch (this->movingState)
 	{
 	case FORWARD:
-		this->translate_all(delta * 1.5f);
+		this->translate_all(delta * forward_speed);
 		break;
 	case BACKWARD:
-		this->translate_all(-delta * 1.5f);
+		this->translate_all(-delta * forward_speed);
 		break;
 	case ROTATE_LEFT:
-		this->rotate_all(delta * 30);
+		this->rotate_all(delta * rotation_speed);
 		break;
 	case ROTATE_RIGHT:
-		this->rotate_all(-delta * 30);
+		this->rotate_all(-delta * rotation_speed);
 		break;
 	case ROTATE_RIGHT_WHILE_FORWARD:
-		this->rotate_all(-delta * 30);
-		this->translate_all(delta * 1.5f);
+		this->rotate_all(-delta * rotation_speed);
+		this->translate_all(delta * forward_speed);
 		break;
 	case ROTATE_LEFT_WHILE_FORWARD:
-		this->rotate_all(delta * 30);
-		this->translate_all(delta * 1.5f);
+		this->rotate_all(delta * rotation_speed);
+		this->translate_all(delta * forward_speed);
 		break;
 	case ROTATE_RIGHT_WHILE_BACKWARD:
-		this->rotate_all(-delta * 30);
-		this->translate_all(-delta * 1.5f);
+		this->rotate_all(-delta * rotation_speed);
+		this->translate_all(-delta * forward_speed);
 		break;
 	case ROTATE_LEFT_WHILE_BACKWARD:
-		this->rotate_all(delta * 30);
-		this->translate_all(-delta * 1.5f);
+		this->rotate_all(delta * rotation_speed);
+		this->translate_all(-delta * forward_speed);
 		break;
 	default:
 		break;
