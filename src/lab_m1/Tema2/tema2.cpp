@@ -56,7 +56,7 @@ void Tema2::Init()
         buildingModels.push_back(Building(glm::vec3(0, 0, 0), 3, 6, 9));
         buildingModels.push_back(Building(glm::vec3(0, 0, 0), 12, 3, 3));
 
-        for (int i = 0; i < 30; i++) {
+        for (int i = 0; i < 60; i++) {
             // get random building model
             int model_index = rand() % buildingModels.size();
             Building building = buildingModels[model_index];
@@ -122,7 +122,7 @@ void Tema2::Init()
     }
 
     {
-        lightPosition = glm::vec3(0, 1, 1);
+        lightPosition = glm::vec3(0, 5, 0);
         materialShininess = 30;
         materialKd = 0.5;
         materialKs = 0.5;
@@ -145,7 +145,7 @@ void Tema2::FrameStart()
     {
         glm::mat4 modelMatrix = glm::mat4(1);
         modelMatrix = glm::scale(modelMatrix, glm::vec3(3));
-        RenderMesh(meshes["plane"], shaders["TemaShader"], modelMatrix, glm::vec3(0.5f));
+        RenderMesh(meshes["plane"], shaders["TemaShader"], modelMatrix, glm::vec3(0.5f), 100, 0);
     }
 
     // Render the tank
@@ -154,15 +154,15 @@ void Tema2::FrameStart()
         modelMatrix = glm::translate(modelMatrix, myTank.position);
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
         modelMatrix = glm::rotate(modelMatrix, RADIANS(myTank.body_angle), glm::vec3(0, 1, 0));
-        RenderMesh(meshes["senile"], shaders["TemaShader"], modelMatrix, myTank.senile_color);
-        RenderMesh(meshes["corp"], shaders["TemaShader"], modelMatrix, myTank.corp_color);
+        RenderMesh(meshes["senile"], shaders["TemaShader"], modelMatrix, myTank.senile_color, myTank.hp, 0);
+        RenderMesh(meshes["corp"], shaders["TemaShader"], modelMatrix, myTank.corp_color, myTank.hp, 0);
 
         modelMatrix = glm::mat4(1);
         modelMatrix = glm::translate(modelMatrix, myTank.position);
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
         modelMatrix = glm::rotate(modelMatrix, RADIANS(myTank.turret_angle), glm::vec3(0, 1, 0));
-        RenderMesh(meshes["turela"], shaders["TemaShader"], modelMatrix, myTank.turela_color);
-        RenderMesh(meshes["tun"], shaders["TemaShader"], modelMatrix, myTank.tun_color);
+        RenderMesh(meshes["turela"], shaders["TemaShader"], modelMatrix, myTank.turela_color, myTank.hp, 0);
+        RenderMesh(meshes["tun"], shaders["TemaShader"], modelMatrix, myTank.tun_color, myTank.hp, 0);
     }
 
     // Render enemy tank
@@ -172,15 +172,15 @@ void Tema2::FrameStart()
 			modelMatrix = glm::translate(modelMatrix, enemyTanks[i].position);
 			modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
 			modelMatrix = glm::rotate(modelMatrix, RADIANS(enemyTanks[i].body_angle), glm::vec3(0, 1, 0));
-			RenderMesh(meshes["senile"], shaders["TemaShader"], modelMatrix, enemyTanks[i].senile_color);
-			RenderMesh(meshes["corp"], shaders["TemaShader"], modelMatrix, enemyTanks[i].corp_color);
+			RenderMesh(meshes["senile"], shaders["TemaShader"], modelMatrix, enemyTanks[i].senile_color, enemyTanks[i].hp, 1);
+			RenderMesh(meshes["corp"], shaders["TemaShader"], modelMatrix, enemyTanks[i].corp_color, enemyTanks[i].hp, 2);
 
 			modelMatrix = glm::mat4(1);
 			modelMatrix = glm::translate(modelMatrix, enemyTanks[i].position);
 			modelMatrix = glm::scale(modelMatrix, glm::vec3(0.1f));
 			modelMatrix = glm::rotate(modelMatrix, RADIANS(enemyTanks[i].turret_angle), glm::vec3(0, 1, 0));
-			RenderMesh(meshes["turela"], shaders["TemaShader"], modelMatrix, enemyTanks[i].turela_color);
-			RenderMesh(meshes["tun"], shaders["TemaShader"], modelMatrix, enemyTanks[i].tun_color);
+			RenderMesh(meshes["turela"], shaders["TemaShader"], modelMatrix, enemyTanks[i].turela_color, enemyTanks[i].hp, 3);
+			RenderMesh(meshes["tun"], shaders["TemaShader"], modelMatrix, enemyTanks[i].tun_color, enemyTanks[i].hp, 0);
         }
     }
 
@@ -190,7 +190,7 @@ void Tema2::FrameStart()
             glm::mat4 modelMatrix = glm::mat4(1);
             modelMatrix = glm::translate(modelMatrix, projectiles[i].position);
             modelMatrix = glm::scale(modelMatrix, glm::vec3(projectiles[i].scale));
-            RenderMesh(meshes["sphere"], shaders["TemaShader"], modelMatrix, glm::vec3(0.88f, 0.88f, 0.88f));
+            RenderMesh(meshes["sphere"], shaders["TemaShader"], modelMatrix, glm::vec3(0.88f, 0.88f, 0.88f), 100, 0);
         }
     }
 
@@ -199,7 +199,7 @@ void Tema2::FrameStart()
 			glm::mat4 modelMatrix = glm::mat4(1);
 			modelMatrix = glm::translate(modelMatrix, buildings[i].center);
 			modelMatrix = glm::scale(modelMatrix, glm::vec3(buildings[i].width, buildings[i].height, buildings[i].depth));
-			RenderMesh(meshes["box"], shaders["TemaShader"], modelMatrix, glm::vec3(0.88f, 0.88f, 0.88f));
+			RenderMesh(meshes["box"], shaders["TemaShader"], modelMatrix, glm::vec3(0.88f, 0.88f, 0.88f), 100, 0);
 		}
     }
 }
@@ -377,7 +377,7 @@ void Tema2::OnWindowResize(int width, int height)
 }
 
 
-void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color)
+void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix, const glm::vec3& color, int hp, int obj_type)
 {
     if (!mesh || !shader || !shader->GetProgramID())
         return;
@@ -388,7 +388,6 @@ void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix,
     // Set shader uniforms for light & material properties
     GLint locLightPos = glGetUniformLocation(shader->program, "light_position");
     glUniform3fv(locLightPos, 1, glm::value_ptr(lightPosition));
-
 
     glm::vec3 eyePosition = camera->position;
     GLint loc_eye_position = glGetUniformLocation(shader->program, "eye_position");
@@ -405,6 +404,12 @@ void Tema2::RenderMesh(Mesh* mesh, Shader* shader, const glm::mat4& modelMatrix,
 
     GLint loc_object_color = glGetUniformLocation(shader->program, "object_color");
     glUniform3fv(loc_object_color, 1, glm::value_ptr(color));
+
+    GLint loc_hp = glGetUniformLocation(shader->program, "hp");
+    glUniform1i(loc_hp, hp);
+
+    GLint loc_obj_type = glGetUniformLocation(shader->program, "obj_type");
+    glUniform1i(loc_obj_type, obj_type);
 
     // Bind model matrix
     GLint loc_model_matrix = glGetUniformLocation(shader->program, "Model");
