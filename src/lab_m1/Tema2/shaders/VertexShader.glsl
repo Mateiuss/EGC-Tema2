@@ -48,7 +48,11 @@ vec3 getColor(vec3 light_position) {
 vec3 displacement(vec3 position, float hp) {
     float damage = 1 - hp / 100.0;
 
-    return vec3(sin(position.x * 5) * damage, 0, sin(position.z * 5) * damage);
+    if (obj_type == 1) {
+		return vec3(sin(position.x * 3.5) * damage, cos (position.y * 3.5 + 3.14 / 2) * damage, 0);
+	}
+
+    return vec3(sin(position.x * 3.5) * damage, 0, sin(position.z * 3.5) * damage);
 }
 
 void main()
