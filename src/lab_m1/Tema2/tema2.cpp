@@ -62,7 +62,7 @@ void Tema2::Init()
         buildingModels.push_back(Building(glm::vec3(0, 0, 0), 3, 6, 9));
         buildingModels.push_back(Building(glm::vec3(0, 0, 0), 12, 3, 3));
 
-        for (int i = 0; i < 60; i++) {
+        for (int i = 0; i < 45; i++) {
             // get random building model
             int model_index = rand() % buildingModels.size();
             Building building = buildingModels[model_index];
@@ -304,6 +304,7 @@ void Tema2::Update(float deltaTimeSeconds)
                 enemyTanks[i].hp -= projectiles[j].damage;
                 if (enemyTanks[i].hp <= 0) {
                     destroyedEnemyTanks.push_back(enemyTanks[i]);
+                    destroyedEnemyTanks[destroyedEnemyTanks.size() - 1].hp = 0.1;
 					enemyTanks.erase(enemyTanks.begin() + i);
 					i--;
                     points += 10;

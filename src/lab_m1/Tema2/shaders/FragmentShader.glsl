@@ -12,7 +12,8 @@ layout(location = 0) out vec4 out_color;
 
 vec3 color_displacement(vec3 color, float hp)
 {
-	float dlt = log(hp / 100);
+	float dlt = log(hp / 25);
+	if (dlt > 0) dlt = 0;
 
 	return vec3(color.x + dlt, color.y + dlt, color.z + dlt);
 }
