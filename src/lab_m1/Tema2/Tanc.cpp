@@ -147,12 +147,10 @@ void Tanc::attack(float delta, glm::vec3 pos, std::vector<Projectile>& projectil
 {
 	this->timeFromLastShot += delta;
 
-	// Check if the player is in range
 	if (glm::distance(this->position, pos) > this->range) return;
 
 	if (glm::distance(this->position, pos) < 4.f) this->movingState = STOP;
 
-	// Move the turret towards the player
 	glm::vec3 direction = glm::normalize(pos - this->position);
 	float angle = glm::degrees(acos(glm::dot(direction, this->forward_turret)));
 

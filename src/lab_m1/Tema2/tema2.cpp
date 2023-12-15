@@ -416,9 +416,8 @@ void Tema2::OnMouseMove(int mouseX, int mouseY, int deltaX, int deltaY)
         float sensivityOX = 0.001f;
         float sensivityOY = 0.001f;
 
-        camera->RotateFirstPerson_OX(-sensivityOY * deltaY);
-        camera->RotateFirstPerson_OY(-sensivityOX * deltaX);
-        camera->position = myTank.position - camera->distanceToTarget * camera->forward;
+        camera->RotateThirdPerson_OX(-sensivityOY * deltaY);
+        camera->RotateThirdPerson_OY(-sensivityOX * deltaX);
     }
     else {
         float sensivity = 0.35f;
@@ -539,7 +538,6 @@ glm::vec3 closestPointOnPrism(Building& building, glm::vec3& spherePos) {
 bool Tema2::tank_building_intersect(Tanc* tank, Building* building) {
     glm::vec3 closestPoint = closestPointOnPrism(*building, tank->position);
 
-    // Check if the distance between the closest point and the sphere center is less than the sphere radius
     float distance = glm::distance(tank->position, closestPoint);
     return distance < tank->radius;
 }
@@ -547,19 +545,14 @@ bool Tema2::tank_building_intersect(Tanc* tank, Building* building) {
 void Tema2::decollision_tank_building(Tanc* tank, Building* building) {
     glm::vec3 closestPoint = closestPointOnPrism(*building, tank->position);
 
-    // Calculate the displacement vector from the sphere center to the closest point
     glm::vec3 displacement = tank->position - closestPoint;
 
-    if (glm::length(displacement) < 0.0001f) {
-		// Sphere center and closest point coincide
-		// Choose random (but consistent) values
+    if (glm::length(displacement) < 0.1f) {
 		displacement = glm::vec3(1, 0, 0);
 	}
 
-    // Normalize the displacement vector
     glm::vec3 collisionNormal = glm::normalize(displacement);
 
-    // Move the tank outside the building by adjusting its position
     tank->position = closestPoint + collisionNormal * tank->radius;
 
     if (tank == &myTank) {
@@ -582,7 +575,6 @@ bool Tema2::tank_projectile_intersect(Tanc* tank, Projectile* projectile) {
 bool Tema2::projectile_building_intersect(Projectile* projectile, Building* building) {
 	glm::vec3 closestPoint = closestPointOnPrism(*building, projectile->position);
 
-	// Check if the distance between the closest point and the sphere center is less than the sphere radius
 	float distance = glm::distance(projectile->position, closestPoint);
     if (distance < projectile->scale) {
 		projectile->lifeTime = Projectile::maxLifeTime;
